@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Dinamica - SubitoGommoni</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#111a2b; --ink:#e8eefc; --muted:#9fb3d9; --accent:#3b82f6; --accent-2:#60a5fa;
+  }
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;}
+  .wrap{max-width:900px;width:100%;margin:40px 16px;}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:700}
+  .logo span{color:white}
+  h1{font-size:clamp(22px,4vw,34px);margin:0}
+  
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);margin-bottom:20px;padding:18px;}
+  .chat-box{height:400px;overflow-y:auto;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#0e1626;}
+  .message{margin-bottom:12px;}
+  .message .user{font-weight:700;color:var(--accent);}
+  .message .time{font-size:12px;color:var(--muted);margin-left:6px;}
+  .chat-inputs{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+  input, button{padding:10px;border-radius:12px;border:none;font:inherit;}
+  input{background:#111a2b;color:var(--ink);}
+  button{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:600;cursor:pointer;}
+  button:active{transform:translateY(1px);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><span>SG</span></div>
+    <div><h1>Chat SubitoGommoni</h1></div>
+  </div>
+
+  <div class="card">
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-inputs">
+      <input type="text" id="username" placeholder="Il tuo nome">
+      <input type="text" id="messageInput" placeholder="Scrivi un messaggio e premi invio">
+      <button id="sendBtn">Invia</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK compat -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyABnxU3Vc1XrAhY8U7C9iFwyfqCXJ1wVoE",
+    authDomain: "chat-9fbec.firebaseapp.com",
+    databaseURL: "https://chat-9fbec-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "chat-9fbec",
+    storageBucket: "chat-9fbec.firebasestorage.app",
+    messagingSenderId: "738401830431",
+    appId: "1:738401830431:web:ed5c1a605388f0eed9772a",
+    measurementId: "G-WN19XF3FHF"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const chatBox = document.getElementById('chatBox');
+  const messageInput = document.getElementById('messageInput');
+  const usernameInput = document.getElementById('username');
+  const sendBtn = document.getElementById('sendBtn');
+
+  function addMessage(msg){
+    const div = document.createElement('div');
+    div.classList.add('message');
+    const time = new Date(msg.time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    div.innerHTML = `<span class="user">${msg.user}</span><span class="time">${time}</span>: ${msg.message}`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function sendMessage(){
+    const user = usernameInput.value.trim() || "Anonimo";
+    const message = messageInput.value.trim();
+    if(message==='') return;
+    db.ref('chat').push({user: user, message: message, time: Date.now()});
+    messageInput.value='';
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keypress', e => {if(e.key==='Enter') sendMessage();});
+
+  db.ref('chat').on('child_added', snapshot => { addMessage(snapshot.val()); });
+</script>
+
+</body>
+</html>
