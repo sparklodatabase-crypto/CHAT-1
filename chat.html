@@ -50,6 +50,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
+  // Configurazione Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyABnxU3Vc1XrAhY8U7C9iFwyfqCXJ1wVoE",
     authDomain: "chat-9fbec.firebaseapp.com",
@@ -89,6 +90,7 @@
   sendBtn.addEventListener('click', sendMessage);
   messageInput.addEventListener('keypress', e => {if(e.key==='Enter') sendMessage();});
 
+  // Leggi messaggi in tempo reale
   db.ref('chat').on('child_added', snapshot => { addMessage(snapshot.val()); });
 </script>
 
